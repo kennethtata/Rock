@@ -27,6 +27,7 @@ using System.Net.Http.Headers;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Web.Http;
 
 using Microsoft.AspNetCore.Mvc;
 
@@ -6180,6 +6181,26 @@ namespace Rock.Rest.v2
             }
         }
 
+
+        [HttpGet]
+        [System.Web.Http.Route("api/v2/controls/groups")]
+        public IHttpActionResult GetGroups(bool includeInactive = false)
+        {
+            var rockContext = new RockContext();
+            var groupService = new GroupService(rockContext);
+
+            var groups = groupService.Queryable()
+                .Where(g => includeInactive || g.IsActive)
+                .Select(g => new
+                {
+                    g.Guid,
+                    g.Name,
+                    g.IsActive
+                })
+                .ToList();
+
+            return Ok(groups);
+        }
         #endregion
 
         #region Group Role Picker
